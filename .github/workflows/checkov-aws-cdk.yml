@@ -1,0 +1,26 @@
+name: CheckOV AWS-CDK Scan
+on:
+  workflow_dispatch: {}
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+      - name: Install CheckOV
+        run: pip install checkov
+      - name: Synthesize CDK Template
+        run: cdk synth > output-template.yaml
+      - name: Run CheckOV Scan
+        run: checkov -f output-template.yaml
+      - name: Upload CheckOV Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkov-report
+          path: checkov_report.json
