@@ -6,7 +6,7 @@ on:
     branches:
       - main
 jobs:
-  security-scan:
+  checkOV-aws-cdk-scan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
