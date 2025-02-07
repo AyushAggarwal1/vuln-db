@@ -20,4 +20,4 @@ jobs:
           tenant_id: ${{ secrets.TENANT_ID }}
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
           label: "sq"
-          sonar_project_key: ${{ secrets.sonar_project_key }}
+          sonar_project_key: "vuln-db"
