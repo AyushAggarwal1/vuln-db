@@ -24,7 +24,7 @@ jobs:
           # quiet:
           # output_format:
           # output_file_path: "./"
-          # framework:
+          framework: "github_actions"
           # skip_framework:
           # soft_fail:
           endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
