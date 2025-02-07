@@ -23,7 +23,7 @@ jobs:
           compact:
           quiet:
           output_format:
-          output_file_path:
+          output_file_path: "./"
           framework:
           skip_framework:
           soft_fail:
