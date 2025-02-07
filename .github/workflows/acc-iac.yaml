@@ -1,0 +1,34 @@
+name: AccuKnox IaC Scan Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@main
+
+      - name: Run IaC scan
+        uses: accuknox/iac-scan-action@v0.0.1
+        with:
+          file:
+          directory:
+          compact:
+          quiet:
+          output_format:
+          output_file_path:
+          framework:
+          skip_framework:
+          soft_fail:
+          endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
+          baseline:
+          token: ${{ secrets.ACCUKNOX_TOKEN }}
+          tenant_id: ${{ secrets.TENANT_ID }}
+          label: "iac"
