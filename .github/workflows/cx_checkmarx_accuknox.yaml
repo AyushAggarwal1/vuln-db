@@ -150,10 +150,10 @@ jobs:
           name: sarif-results-with-snippets
           path: tmp_sarif_with_snippets.sarif
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: tmp_sarif_with_snippets.sarif
+      # - name: Upload SARIF file
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: tmp_sarif_with_snippets.sarif
 
       # - name: Push SARIF file to CSPM panel
       #   run: |
