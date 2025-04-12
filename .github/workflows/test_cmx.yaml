@@ -16,12 +16,13 @@ jobs:
 
       - name: Run Checkmarx Docker Scan
         run: |
-          docker run --rm -it \
+          docker run --rm \
             -e ACCESS_TOKEN=${{ secrets.CHECKMARX_ACCESS_TOKEN }} \
             -e REGION=DEU \
             -e TENANT_NAME=accuknox-nfr \
             -e PROJECT_ID=6b91b6fb-29d1-4bdd-b669-8cf1f023d269 \
             -e REPORT_PATH=/app/data/ \
+            -v ${{ github.workspace }}:/app/data/ \
             accuknox/checkmarxjob:1.0.3
 
       - name: Upload Checkmarx report as artifact
