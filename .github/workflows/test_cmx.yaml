@@ -1,0 +1,32 @@
+name: Run Checkmarx Scan
+
+on:
+  workflow_dispatch:
+
+jobs:
+  checkmarx-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Remove existing reports (optional cleanup)
+        run: rm -f Checkmarx-*.json
+
+      - name: Run Checkmarx Docker Scan
+        run: |
+          docker run --rm -it \
+            -e ACCESS_TOKEN=${{ secrets.CHECKMARX_ACCESS_TOKEN }} \
+            -e REGION=DEU \
+            -e TENANT_NAME=accuknox-nfr \
+            -e PROJECT_ID=6b91b6fb-29d1-4bdd-b669-8cf1f023d269 \
+            -e REPORT_PATH=/app/data/ \
+            -v ${{ github.workspace }}:/app/data/ \
+            accuknox/checkmarxjob:1.0.3
+
+      - name: Upload Checkmarx report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkmarx-report
+          path: Checkmarx-*.json
