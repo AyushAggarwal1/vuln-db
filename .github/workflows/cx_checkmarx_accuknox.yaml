@@ -1,15 +1,12 @@
-# Accuknox Checkmarx SARIF Integration
-
 name: Checkmarx Sarif Integration
 
 on:
-  workflow_dispatch: {}
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  # schedule:
-  #   - cron: '18 2 * * 5'
+  schedule:
+    - cron: '18 2 * * 5'
 
 permissions:
   security-events: write
@@ -70,7 +67,7 @@ jobs:
                   "source": $source
                 }
               }]' cx_result.sarif > tmp.sarif && mv tmp.sarif cx_result.sarif
-              
+
       - name: Extract and Embed Code Snippets in SARIF using Python
         id: embed_snippets
         run: |
@@ -79,23 +76,27 @@ jobs:
           import json
 
           def get_code_snippet(lines, start_line, start_column, end_column):
-              start_line = max(start_line - 3, 0)  # Start from 3 lines before or 0
-              end_line = min(start_line + 5, len(lines))  # End 2 lines after the snippet
+              start_line_index = max(start_line - 3, 0)  # Start 2 lines before or 0
+              end_line_index = min(start_line + 2, len(lines))  # End 2 lines after
 
-              snippet_lines = lines[start_line:end_line]
+              snippet_lines = lines[start_line_index:end_line_index]
               highlighted_snippet = []
 
               for i, line in enumerate(snippet_lines):
-                  line_number = start_line + i + 1  # Correct line number offset
+                  line_number = start_line_index + i + 1
 
-                  if line_number == start_line:  # Highlight the start line
-                      highlighted_snippet.append(
-                          line[:start_column - 1] +
-                          "<<<HIGHLIGHT>>>" +
-                          line[start_column - 1:end_column] +
-                          "<<<END_HIGHLIGHT>>>" +
-                          line[end_column:]
-                      )
+                  if line_number == start_line:
+                      try:
+                          highlighted_snippet.append(
+                              line[:max(0, start_column - 1)] +
+                              "<<<HIGHLIGHT>>>" +
+                              line[max(0, start_column - 1):min(len(line), end_column)] +
+                              "<<<END_HIGHLIGHT>>>" +
+                              line[min(len(line), end_column):]
+                          )
+                      except Exception as e:
+                          print(f"Error highlighting line {line_number}: {e}")
+                          highlighted_snippet.append(line)
                   else:
                       highlighted_snippet.append(line)
 
@@ -149,15 +150,15 @@ jobs:
           name: sarif-results-with-snippets
           path: tmp_sarif_with_snippets.sarif
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: tmp_sarif_with_snippets.sarif
+      # - name: Upload SARIF file
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: tmp_sarif_with_snippets.sarif
 
-      - name: Push SARIF file to CSPM panel
-        run: |
-          curl --location '${{ secrets.CSPM_URL }}/api/v1/artifact/?tenant_id=${{ secrets.TENANT_ID }}&data_type=CMX&save_to_s3=true&label_id=${{ secrets.LABEL_ID }}' \
-            --header 'Tenant-Id: ${{ secrets.TENANT_ID }}' \
-            --header 'Authorization: Bearer ${{ secrets.CSPM_TOKEN }}' \
-            --form 'file=@./tmp_sarif_with_snippets.sarif'
+      # - name: Push SARIF file to CSPM panel
+      #   run: |
+      #     curl --location '${{ secrets.CSPM_URL }}/api/v1/artifact/?tenant_id=${{ secrets.TENANT_ID }}&data_type=CX&save_to_s3=true&label_id=${{ secrets.LABEL_ID }}' \
+      #       --header 'Tenant-Id: ${{ secrets.TENANT_ID }}' \
+      #       --header 'Authorization: Bearer ${{ secrets.CSPM_TOKEN }}' \
+      #       --form 'file=@./tmp_sarif_with_snippets.sarif'
             

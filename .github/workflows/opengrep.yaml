@@ -1,0 +1,47 @@
+name: Opengrep Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  INPUT_SOFT_FAIL: "false"
+
+jobs:
+  accuknox-cicd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run OpenGrep Test
+        env:
+          PIPELINE_ID: "${{ github.run_id }}"
+          JOB_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        run: |
+          set +e  # Allow commands to fail without stopping the script
+          docker run --rm -v "$PWD:/app" \
+            -e REPOSITORY_URL="$REPOSITORY_URL" \
+            -e COMMIT_SHA="$COMMIT_SHA" \
+            -e COMMIT_REF="$COMMIT_REF" \
+            -e PIPELINE_ID="$PIPELINE_ID" \
+            -e JOB_URL="$JOB_URL" \
+            safeeraccuknox/demo:opengreptest-1.7
+          export OPENGREP_EXIT_CODE=$?
+          echo "OPENGREP_EXIT_CODE=$OPENGREP_EXIT_CODE" >> $GITHUB_ENV
+          echo "OPENGREP_EXIT_CODE_V1=$OPENGREP_EXIT_CODE"
+
+      - name: Archive JSON Report
+        run: |
+          mkdir -p opengrep-results
+          mv results.json opengrep-results/results.json || echo "No JSON file found"
+        
+      - name: Upload OpenGrep Results as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opengrep-results
+          path: opengrep-results/results.json
