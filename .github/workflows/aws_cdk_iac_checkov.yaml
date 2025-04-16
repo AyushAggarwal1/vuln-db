@@ -1,4 +1,4 @@
-# Accuknox aws-cdk scan using checkov
+# accuknox aws-cdk scan using checkov
 
 name: CheckOV AWS-CDK Scan
 
